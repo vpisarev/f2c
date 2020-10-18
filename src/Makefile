@@ -2,7 +2,7 @@
 
 .SUFFIXES: .c .o
 CC = cc
-CFLAGS = -O
+CFLAGS = -O -Wno-parentheses
 SHELL = /bin/sh
 YACC = yacc
 YFLAGS =
@@ -24,7 +24,7 @@ MALLOC =
 
 OBJECTS = $(OBJECTSd) $(MALLOC)
 
-all: xsum.out f2c
+all: f2c
 
 f2c: $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o f2c
@@ -34,18 +34,13 @@ f2c: $(OBJECTS)
 # distribute a correctly functioning gram.c (derived with a Unix variant
 # of the yacc from plan9).
 
-gram1.c: gram.head gram.dcl gram.expr gram.exec gram.io defs.h tokdefs.h
-	( sed <tokdefs.h "s/#define/%token/" ;\
-		cat gram.head gram.dcl gram.expr gram.exec gram.io ) >gram.in
-	$(YACC) $(YFLAGS) gram.in
+gram.c: defs.h gram.y
+	$(YACC) $(YFLAGS) --defines=tokdefs.h gram.y
 	@echo "(There should be 4 shift/reduce conflicts.)"
 	sed 's/^# line.*/\/* & *\//' y.tab.c >gram.c
-	rm -f gram.in y.tab.c
+	rm -f y.tab.c
 
 $(OBJECTSd): defs.h ftypes.h defines.h machdefs.h sysdep.h
-
-tokdefs.h: tokens
-	grep -n . <tokens | sed "s/\([^:]*\):\(.*\)/#define \2 \1/" >tokdefs.h
 
 cds.o: sysdep.h
 exec.o: p1defs.h names.h
@@ -86,7 +81,7 @@ f2c.t: f2c.1t
 #	nroff -man f2c.1t | col -b | uniq >f2c.1
 
 clean:
-	rm -f *.o f2c sysdep.hd tokdefs.h f2c.t
+	rm -f *.o f2c sysdep.hd f2c.t gram.c tokdefs.h
 
 veryclean: clean
 	rm -f xsum

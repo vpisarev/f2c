@@ -22,6 +22,7 @@ use or performance of this software.
 ****************************************************************/
 #include "defs.h"
 #include "usignal.h"
+#include <unistd.h>
 
 char binread[] = "rb", textread[] = "r";
 char binwrite[] = "wb", textwrite[] = "w";
@@ -113,13 +114,6 @@ rmtdir(Void)
 		}
 	}
 #endif /*NO_TEMPDIR*/
-
-#ifndef MSDOS
-#include "sysdep.hd"
-#ifndef NO_MKDTEMP
-#include <unistd.h> /* for mkdtemp */
-#endif
-#endif
 
  static void
 alloc_names(Void)

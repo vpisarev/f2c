@@ -34,6 +34,9 @@ int badargs;
 char **ftn_files;
 int current_ftn_file = 0;
 
+char* f2c_include_hdr = "f2c.h";
+flag protoflag = YES;
+flag passlenflag = NO;
 flag ftn66flag = NO;
 flag nowarnflag = NO;
 flag noextflag = NO;
@@ -69,7 +72,7 @@ int maxhash = MAXHASH;
 int maxliterals = MAXLITERALS;
 int maxcontin = MAXCONTIN;
 int maxlablist = MAXLABLIST;
-int extcomm, ext1comm, useauto;
+int extcomm, ext1comm, useauto = YES;
 int can_include = YES;	/* so we can disable includes for netlib */
 
 static char *def_i2 = "";
@@ -213,6 +216,16 @@ static arg_info table[] = {
 	/* promoting them to DOUBLE PRECISION . */
 
     f2c_entry ("dneg", P_NO_ARGS, P_INT, &dneg, YES),
+
+    /* in official Lapack .h headers functions
+       that take strings do not take extra "ftnlen <string_length>" parameters.
+       so, by default this version of f2c generates functions
+       w/o extra parameters. If this behaviour is necessary,
+       pass "-passlen" option
+    */
+    f2c_entry ("passlen", P_NO_ARGS, P_INT, &passlenflag, YES),
+    f2c_entry ("hdr", P_ONE_ARG, P_STRING, &f2c_include_hdr, 0),
+    f2c_entry ("no-proto", P_NO_ARGS, P_INT, &protoflag, NO),
 
 	/* -?, --help, -v, --version */
 
@@ -685,7 +698,7 @@ sed \"s/^\\/\\*>>>'\\(.*\\)'<<<\\*\\/\\$/cat >'\\1' <<'\\/*<<<\\1>>>*\\/'/\" | /
 	if (Ansi == 2)
 		nice_printf(c_output,
 			"#ifdef __cplusplus\nextern \"C\" {\n#endif\n");
-	nice_printf (c_output, "%s#include \"f2c.h\"\n\n", def_i2);
+	nice_printf (c_output, "%s#include \"%s\"\n\n", def_i2, f2c_include_hdr);
 	if (trapuv)
 		nice_printf(c_output, "extern void _uninit_f2c(%s);\n%s\n\n",
 			Ansi ? "void*,int,long" : "", "extern double _0;");

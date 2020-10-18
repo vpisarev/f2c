@@ -1889,7 +1889,8 @@ putcall(expptr p0, Addrp *temp)
 
 /* ... and add them to the end of the argument list */
 
-    hookup (arglist, charsp);
+    if (passlenflag)
+        hookup (arglist, charsp);
 
 /* Return the name of the temporary used to hold the results, if any was
    necessary. */

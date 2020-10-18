@@ -89,6 +89,9 @@ extern int maxstno;
 extern int maxhash;
 extern int maxext;
 
+extern char* f2c_include_hdr;
+extern flag protoflag;
+extern flag passlenflag;
 extern flag nowarnflag;
 extern flag ftn66flag;		/* Generate warnings when weird f77
 				   features are used (undeclared dummy

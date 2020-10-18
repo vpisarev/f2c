@@ -480,7 +480,7 @@ mklabel(ftnint l)
 {
 	register struct Labelblock *lp;
 
-	if(l <= 0)
+	if(l < 0)
 		return(NULL);
 
 	for(lp = labeltab ; lp < highlabtab ; ++lp)

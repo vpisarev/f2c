@@ -554,7 +554,9 @@ do_p1_goto(FILE *infile, FILE *outfile)
 	err ("do_p1_goto:  Missing goto label at end of file");
     else if (status == 0)
 	err ("do_p1_goto:  Missing goto label in p1 file");
-    else {
+    else if (stateno == 0) {
+    nice_printf (outfile, "break;\n");
+    } else {
 	nice_printf (outfile, "goto %s;\n", user_label (stateno));
     } /* else */
 } /* do_p1_goto */
@@ -1262,9 +1264,12 @@ list_arg_types(FILE *outfile, struct Entrypoint *entryp, chainp lengths, int add
 	} /* if (arg) */
     } /* for args = entryp -> arglist */
 
-    for (args = lengths; args; args = args -> nextp)
-	nice_printf(outfile, "%sftnlen %s", sep,
-			new_arg_length((Namep)args->datap));
+    if (passlenflag) {
+        for (args = lengths; args; args = args -> nextp)
+            nice_printf(outfile, "%sftnlen %s", sep,
+                        new_arg_length((Namep)args->datap));
+    }
+
     if (did_one)
 	nice_printf (outfile, ";\n");
     else if (Ansi)
@@ -1599,7 +1604,7 @@ ref_defs(FILE *outfile, chainp refdefs)
 				nice_printf(outfile, "%sa_%d", comma, i);
 			nice_printf(outfile, ")");
 			}
-		margin_printf(outfile, "]\n" + eb);
+		margin_printf(outfile, (eb ? "\n" : "]\n"));
 		}
 	nice_printf(outfile, "\n");
 	frchain(&refdefs);
@@ -1743,8 +1748,8 @@ list_decls(FILE *outfile)
 	    write_nv_ident(outfile, (Addrp)this_var->datap);
 	    if (Var -> vtype == TYCHAR && Var->vclass != CLPROC &&
 		    ISICON((Var -> vleng))
-			&& (k = Var->vleng->constblock.Const.ci) > 0)
-		nice_printf (outfile, "[%ld]", (long)k);
+            && Var->vleng->constblock.Const.ci > 0)
+            nice_printf (outfile, "[F2C_STR_MAX]");
 
 	    did_one = 1;
 	    last_type = nv_type (Var);
@@ -1760,7 +1765,7 @@ list_decls(FILE *outfile)
 
 /* Write out builtin declarations */
 
-    if (used_builtins) {
+    if (used_builtins && protoflag) {
 	chainp cp;
 	Extsym *es;
 

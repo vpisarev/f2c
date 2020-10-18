@@ -156,6 +156,117 @@ LOCAL struct Keylist *keystart[26], *keyend[26];
 /* KEYWORD AND SPECIAL CHARACTER TABLES
 */
 
+static const char* toknames[] = {
+"SEOS",
+"SCOMMENT",
+"SLABEL",
+"SUNKNOWN",
+"SHOLLERITH",
+"SICON",
+"SRCON",
+"SDCON",
+"SBITCON",
+"SOCTCON",
+"SHEXCON",
+"STRUE",
+"SFALSE",
+"SNAME",
+"SNAMEEQ",
+"SFIELD",
+"SSCALE",
+"SINCLUDE",
+"SLET",
+"SASSIGN",
+"SAUTOMATIC",
+"SBACKSPACE",
+"SBLOCK",
+"SCALL",
+"SCHARACTER",
+"SCLOSE",
+"SCOMMON",
+"SCOMPLEX",
+"SCONTINUE",
+"SDATA",
+"SDCOMPLEX",
+"SDIMENSION",
+"SDO",
+"SDOUBLE",
+"SELSE",
+"SELSEIF",
+"SEND",
+"SENDFILE",
+"SENDIF",
+"SENTRY",
+"SEQUIV",
+"SEXTERNAL",
+"SFORMAT",
+"SFUNCTION",
+"SGOTO",
+"SASGOTO",
+"SCOMPGOTO",
+"SARITHIF",
+"SLOGIF",
+"SIMPLICIT",
+"SINQUIRE",
+"SINTEGER",
+"SINTRINSIC",
+"SLOGICAL",
+"SNAMELIST",
+"SOPEN",
+"SPARAM",
+"SPAUSE",
+"SPRINT",
+"SPROGRAM",
+"SPUNCH",
+"SREAD",
+"SREAL",
+"SRETURN",
+"SREWIND",
+"SSAVE",
+"SSTATIC",
+"SSTOP",
+"SSUBROUTINE",
+"STHEN",
+"STO",
+"SUNDEFINED",
+"SWRITE",
+"SLPAR",
+"SRPAR",
+"SEQUALS",
+"SCOLON",
+"SCOMMA",
+"SCURRENCY",
+"SPLUS",
+"SMINUS",
+"SSTAR",
+"SSLASH",
+"SPOWER",
+"SCONCAT",
+"SAND",
+"SOR",
+"SNEQV",
+"SEQV",
+"SNOT",
+"SEQ",
+"SLT",
+"SGT",
+"SLE",
+"SGE",
+"SNE",
+"SENDDO",
+"SWHILE",
+"SSLASHD",
+"SBYTE",
+"SRECURSIVE",
+"SEXIT"};
+
+static const char* tok2str(int tok)
+{
+    if(tok >= SEOS && tok <= SEXIT)
+        return toknames[tok-SEOS];
+    return "???";
+}
+
 static struct Punctlist puncts[ ] =
 {
 	'(', SLPAR,
@@ -214,6 +325,7 @@ LOCAL struct Keylist  keys[ ] =
 	{ "end",  SEND  },
 	{ "entry",  SENTRY, YES  },
 	{ "equivalence",  SEQUIV  },
+    { "exit", SEXIT, YES },
 	{ "external",  SEXTERNAL  },
 	{ "format",  SFORMAT  },
 	{ "function",  SFUNCTION  },
@@ -234,6 +346,7 @@ LOCAL struct Keylist  keys[ ] =
 	{ "punch",  SPUNCH, YES  },
 	{ "read",  SREAD  },
 	{ "real",  SREAL  },
+    { "recursive", SRECURSIVE, YES },
 	{ "return",  SRETURN  },
 	{ "rewind",  SREWIND  },
 	{ "save",  SSAVE, YES  },
@@ -530,7 +643,7 @@ yylex(Void)
 first:
 	case FIRSTTOKEN :	/* first step on a statement */
 		analyz();
-		lexstate = OTHERTOKEN;
+		lexstate = stkey == SRECURSIVE ? FIRSTTOKEN : OTHERTOKEN;
 		tokno = 1;
 		retval = stkey;
 		break;
@@ -571,6 +684,7 @@ reteos:
 	if (retval == SEOF)
 	    flush_comments ();
 
+    //printf("%s ", tok2str(retval)); fflush(stdout);
 	return retval;
 }
 
