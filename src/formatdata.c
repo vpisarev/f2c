@@ -157,7 +157,7 @@ wr_char_len(FILE *outfile, struct Dimblock *dimp, ftnint n, int extra1)
 	ftnint j, rv;
 
 	if (!dimp) {
-		nice_printf (outfile, extra1 ? "[%ld+1]" : "[%ld]", (long)n);
+		nice_printf (outfile, extra1 ? "[%ld+1]={}" : "[%ld]={}", (long)n);
 		return n + extra1;
 		}
 	nice_printf(outfile, "[%ld", (long)n);
@@ -184,7 +184,7 @@ wr_char_len(FILE *outfile, struct Dimblock *dimp, ftnint n, int extra1)
 	 * too many initializers in
 	 *	char x[2] = "ab";
 	 */
-	nice_printf(outfile, extra1 ? "+1]" : "]");
+	nice_printf(outfile, extra1 ? "+1]={}" : "]={}");
 	return extra1 ? rv+1 : rv;
 	}
 
@@ -276,7 +276,7 @@ wr_one_init(FILE *outfile, char *varname, chainp *Values, int keepit)
     char *array_comment = NULL, *name;
     chainp cp, values;
     extern char datachar[];
-    static int e1[3] = {1, 0, 1};
+    static int e1[3] = {1, 1, 1};
     ftnint x;
     extern int hsize;
 

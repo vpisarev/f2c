@@ -1749,7 +1749,7 @@ list_decls(FILE *outfile)
 	    if (Var -> vtype == TYCHAR && Var->vclass != CLPROC &&
 		    ISICON((Var -> vleng))
             && Var->vleng->constblock.Const.ci > 0)
-            nice_printf (outfile, "[F2C_STR_MAX]");
+            nice_printf (outfile, "[F2C_STR_MAX]={}");
 
 	    did_one = 1;
 	    last_type = nv_type (Var);
@@ -1971,7 +1971,7 @@ list_decls(FILE *outfile)
 			}
 		else if (type == TYCHAR && ISICON ((var -> vleng)))
 			wr_char_len(outfile, var->vdim,
-				var->vleng->constblock.Const.ci, 0);
+				var->vleng->constblock.Const.ci, 1);
 		else if (var -> vdim &&
 		    !oneof_stg (var, stg, M(STGEQUIV)|M(STGCOMMON)))
 			comment = wr_ardecls(outfile, var->vdim, 1L);
