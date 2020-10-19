@@ -367,6 +367,13 @@ rename_types(Void)
     protorettypes[TYLOGICAL] = "int";
     protorettypes[TYSHORT] = "short";
 
+    ftn_types[TYLONG] = "int";
+    ftn_types[TYREAL] = "float";
+    ftn_types[TYDREAL] = "double";
+    ftn_types[TYLOGICAL] = "int";
+    ftn_types[TYSHORT] = "short";
+    ftn_types[TYFTNLEN] = "int";
+
 #ifdef TYQUAD
     Typename[TYQUAD] = "int64_t";
     protorettypes[TYQUAD] = "int64_t";

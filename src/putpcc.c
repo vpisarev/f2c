@@ -1889,8 +1889,28 @@ putcall(expptr p0, Addrp *temp)
 
 /* ... and add them to the end of the argument list */
 
-    if (passlenflag)
+    int need_len_args = passlenflag ? -1 : 0;
+    if (need_len_args == 0 && p->leftp->tag == TADDR &&
+        p->leftp->addrblock.uname_tag == UNAM_EXTERN) {
+        const char* cname = extsymtab[p->leftp->addrblock.memno].cextname;
+        if (strcmp(cname, "s_copy") == 0)
+            need_len_args = 1;
+    }
+
+    if (passlenflag || need_len_args > 0) {
+        if (need_len_args > 0) {
+            int i = 0;
+            cp = charsp;
+            for (; i < need_len_args-1 && cp->nextp; i++)
+                cp = cp->nextp;
+            if(cp)
+                frchain(&cp->nextp);
+        }
+
         hookup (arglist, charsp);
+    }
+    else
+        frchain(&charsp);
 
 /* Return the name of the temporary used to hold the results, if any was
    necessary. */

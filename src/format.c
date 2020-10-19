@@ -1234,7 +1234,7 @@ list_arg_types(FILE *outfile, struct Entrypoint *entryp, chainp lengths, int add
 	did_one = done_one;
 	sep = sep1;
 	if (proctype == TYCHAR)
-	    nice_printf (outfile, "%sftnlen ret_val_len", sep);
+	    nice_printf (outfile, "%s%s ret_val_len", sep, ftn_types[TYFTNLEN]);
     } /* if ONEOF proctype */
     for (; args; args = args -> nextp) {
 	Namep arg = (Namep) args->datap;
@@ -1283,7 +1283,7 @@ list_arg_types(FILE *outfile, struct Entrypoint *entryp, chainp lengths, int add
 
     if (passlenflag) {
         for (args = lengths; args; args = args -> nextp)
-            nice_printf(outfile, "%sftnlen %s", sep,
+            nice_printf(outfile, "%s%s %s", sep, ftn_types[TYFTNLEN],
                         new_arg_length((Namep)args->datap));
     }
 
@@ -1462,8 +1462,8 @@ write_namelists(chainp nmch, FILE *outfile)
 		if (dimp = v->vdim) {
 			nd = dimp->ndim;
 			nice_printf(outfile,
-				"static ftnlen %s_dims[] = { %d, %ld, %ld",
-				name, nd,
+				"static %s %s_dims[] = { %d, %ld, %ld",
+				ftn_types[TYFTNLEN], name, nd,
 				dimp->nelt->constblock.Const.ci,
 				dimp->baseoffset->constblock.Const.ci);
 			for(i = 0, --nd; i < nd; i++)
@@ -1478,7 +1478,7 @@ write_namelists(chainp nmch, FILE *outfile)
 					M(STGEQUIV)|M(STGCOMMON)))
 				? "(char *)" : "(char *)&");
 		out_name(outfile, v);
-		nice_printf(outfile, dimp ? ", %s_dims" : ", (ftnlen *)0", name);
+		nice_printf(outfile, dimp ? ", %s_dims" : ", (%s *)0", name, ftn_types[TYFTNLEN]);
 		nice_printf(outfile, ", %ld };\n",
 			type != TYCHAR  ? (long)typeconv[type]
 					: -v->vleng->constblock.Const.ci);

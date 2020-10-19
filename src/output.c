@@ -1350,8 +1350,8 @@ out_call(FILE *outfile, int op, int ftype, expptr len, expptr name, expptr args)
 
 	else if (q -> tag == TCONST) {
 		if (q->constblock.vtype == TYLONG)
-			nice_printf(outfile, "(ftnlen)%ld",
-				q->constblock.Const.ci);
+			nice_printf(outfile, "(%s)%ld",
+				ftn_types[TYFTNLEN], q->constblock.Const.ci);
 		else
 			out_const(outfile, &q->constblock);
 	    }
@@ -1371,7 +1371,7 @@ out_call(FILE *outfile, int op, int ftype, expptr len, expptr name, expptr args)
 			}
 		}
 	    else if (!Ansi && ISINT(q->headblock.vtype)) {
-		nice_printf(outfile, "(ftnlen)");
+		nice_printf(outfile, "(%s)", ftn_types[TYFTNLEN]);
 		use_paren = 1;
 		}
 	    if (use_paren) nice_printf (outfile, "(");

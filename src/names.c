@@ -118,7 +118,7 @@ c_type_decl(int type, int is_extern)
 	case TYCLLIST:	strcpy (buff, "cllist");	break;
 	case TYALIST:	strcpy (buff, "alist");		break;
 	case TYINLIST:	strcpy (buff, "inlist");	break;
-	case TYFTNLEN:	strcpy (buff, "ftnlen");	break;
+	case TYFTNLEN:	strcpy (buff, ftn_types[TYFTNLEN]);	break;
 	default:	sprintf (buff, "BAD DECL '%d'", type);
 							break;
     } /* switch */

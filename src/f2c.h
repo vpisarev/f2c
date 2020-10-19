@@ -7,8 +7,6 @@
 #ifndef F2C_INCLUDE
 #define F2C_INCLUDE
 
-#define F2C_MAX_STR 128
-
 typedef long int integer;
 typedef unsigned long int uinteger;
 typedef char *address;
