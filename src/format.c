@@ -1765,8 +1765,8 @@ list_decls(FILE *outfile)
 	    write_nv_ident(outfile, (Addrp)this_var->datap);
 	    if (Var -> vtype == TYCHAR && Var->vclass != CLPROC &&
 		    ISICON((Var -> vleng))
-            && Var->vleng->constblock.Const.ci > 0)
-            nice_printf (outfile, "[F2C_STR_MAX]={}");
+            && (k = Var->vleng->constblock.Const.ci) > 0)
+            nice_printf (outfile, "[%ld+1]={'\\0'}", (long)k);
 
 	    did_one = 1;
 	    last_type = nv_type (Var);
