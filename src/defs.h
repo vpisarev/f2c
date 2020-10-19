@@ -90,6 +90,8 @@ extern int maxhash;
 extern int maxext;
 
 extern char* f2c_include_hdr;
+extern flag ctypesflag;
+extern flag localconstflag;
 extern flag protoflag;
 extern flag passlenflag;
 extern flag nowarnflag;
@@ -1062,7 +1064,7 @@ char*	wr_ardecls Argdcl((FILE*, struct Dimblock*, long));
 void	wr_array_init Argdcl((FILEP, int, chainp));
 void	wr_common_decls Argdcl((FILEP));
 void	wr_equiv_init Argdcl((FILEP, int, chainp*, int));
-void	wr_globals Argdcl((FILEP));
+void	wr_globals Argdcl((FILEP, int));
 void	wr_nv_ident_help Argdcl((FILEP, Addrp));
 void	wr_struct Argdcl((FILEP, chainp));
 void	wronginf Argdcl((Namep));

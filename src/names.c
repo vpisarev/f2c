@@ -69,15 +69,15 @@ c_type_decl(int type, int is_extern)
 
     switch (type) {
 	case TYREAL:	if (!is_extern || !forcedouble)
-				{ strcpy (buff, "real");break; }
-	case TYDREAL:	strcpy (buff, "doublereal");	break;
+				{ strcpy (buff, Typename[TYREAL]);break; }
+	case TYDREAL:	strcpy (buff, Typename[TYDREAL]);	break;
 	case TYCOMPLEX:	if (is_extern)
-			    strcpy (buff, "/* Complex */ VOID");
+			    strcpy (buff, "/* Complex */ void");
 			else
 			    strcpy (buff, "complex");
 			break;
 	case TYDCOMPLEX:if (is_extern)
-			    strcpy (buff, "/* Double Complex */ VOID");
+			    strcpy (buff, "/* Double Complex */ void");
 			else
 			    strcpy (buff, "doublecomplex");
 			break;
@@ -336,12 +336,14 @@ comm_union_name(int count)
 
  void
 #ifdef KR_headers
-wr_globals(outfile)
+wr_globals(outfile, use_static)
 	FILE *outfile;
+    int use_static;
 #else
-wr_globals(FILE *outfile)
+wr_globals(FILE *outfile, int use_static)
 #endif
 {
+    const char* const_storage = use_static ? "static " : "";
     struct Literal *litp, *lastlit;
     extern int hsize;
     char *litname;
@@ -355,11 +357,11 @@ wr_globals(FILE *outfile)
     lastlit = litpool + nliterals;
     did_one = 0;
     for (litp = litpool; litp < lastlit; litp++) {
-	if (!litp->lituse)
+	if (!litp->lituse && !localconstflag)
 		continue;
 	litname = lit_name(litp);
 	if (!did_one) {
-		margin_printf(outfile, "/* Table of constant values */\n\n");
+		nice_printf(outfile, "// Table of constant values\n");
 		did_one = 1;
 		}
 	cb.vtype = litp->littype;
@@ -368,7 +370,7 @@ wr_globals(FILE *outfile)
 		if (y = x % hsize)
 			x += y = hsize - y;
 		nice_printf(outfile,
-			"static struct { %s fill; char val[%ld+1];", halign, x);
+			"%sstruct { %s fill; char val[%ld+1];", const_storage, halign, x);
 		nice_printf(outfile, " char fill2[%ld];", hsize - 1);
 		nice_printf(outfile, " } %s_st = { 0,", litname);
 		cb.vleng = ICON(litp->litval.litival2[0]);
@@ -381,8 +383,8 @@ wr_globals(FILE *outfile)
 		nice_printf(outfile, "#define %s %s_st.val\n", litname, litname);
 		continue;
 		}
-	nice_printf(outfile, "static %s %s = ",
-		c_type_decl(litp->littype,0), litname);
+	nice_printf(outfile, "%s%s %s = ",
+		const_storage, c_type_decl(litp->littype,0), litname);
 
 	t = litp->littype;
 	if (ONEOF(t, MSKREAL|MSKCOMPLEX)) {

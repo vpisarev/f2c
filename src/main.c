@@ -35,6 +35,8 @@ char **ftn_files;
 int current_ftn_file = 0;
 
 char* f2c_include_hdr = "f2c.h";
+flag ctypesflag = NO;
+flag localconstflag = NO;
 flag protoflag = YES;
 flag passlenflag = NO;
 flag ftn66flag = NO;
@@ -225,6 +227,8 @@ static arg_info table[] = {
     */
     f2c_entry ("passlen", P_NO_ARGS, P_INT, &passlenflag, YES),
     f2c_entry ("hdr", P_ONE_ARG, P_STRING, &f2c_include_hdr, 0),
+    f2c_entry ("localconst", P_NO_ARGS, P_INT, &localconstflag, YES),
+    f2c_entry ("ctypes", P_NO_ARGS, P_INT, &ctypesflag, YES),
     f2c_entry ("no-proto", P_NO_ARGS, P_INT, &protoflag, NO),
 
 	/* -?, --help, -v, --version */
@@ -250,7 +254,7 @@ FILE *protofile;
  void
 set_externs(Void)
 {
-    static char *hset[3] = { 0, "integer", "doublereal" };
+    char *hset[3] = { 0, Typename[TYLONG], Typename[TYDREAL] };
 
 /* Adjust the global flags according to the command line parameters */
 
@@ -348,6 +352,27 @@ set_externs(Void)
 } /* set_externs */
 
 
+ static void
+rename_types(Void)
+{
+    Typename[TYLONG] = "int";
+    Typename[TYREAL] = "float";
+    Typename[TYDREAL] = "double";
+    Typename[TYLOGICAL] = "int";
+    Typename[TYSHORT] = "short";
+
+    protorettypes[TYLONG] = "int";
+    protorettypes[TYREAL] = "float";
+    protorettypes[TYDREAL] = "double";
+    protorettypes[TYLOGICAL] = "int";
+    protorettypes[TYSHORT] = "short";
+
+#ifdef TYQUAD
+    Typename[TYQUAD] = "int64_t";
+    protorettypes[TYQUAD] = "int64_t";
+#endif
+}
+
  static int
 comm2dcl(Void)
 {
@@ -393,7 +418,7 @@ write_typedefs(FILE *outfile)
 		if (used_rets[st[i]])
 			nice_printf(outfile,
 				"typedef %s %c_f; /* %s function */\n",
-				p = (char*)(i ? "VOID" : "doublereal"),
+				p = (char*)(i ? "VOID" : Typename[TYDREAL]),
 				stl[i], ftn_types[st[i]]);
 	if (p)
 		nice_printf(outfile, "#endif\n\n");
@@ -606,6 +631,9 @@ main(int argc, char **argv)
 	else
 		dfltproc = dflt1proc;
 
+    if (ctypesflag)
+        rename_types();
+
 	outbuf_adjust();
 	set_externs();
 	fileinit();
@@ -690,15 +718,16 @@ sed \"s/^\\/\\*>>>'\\(.*\\)'<<<\\*\\/\\$/cat >'\\1' <<'\\/*<<<\\1>>>*\\/'/\" | /
 		nice_printf (c_output, "#line 1 \"%s\"\n", file_name);
 	if (!skipversion) {
 		nice_printf (c_output, "/* %s -- translated by f2c ", file_name);
-		nice_printf (c_output, "(version %s).\n", F2C_version);
-		nice_printf (c_output,
-	"   You must link the resulting object file with libf2c:\n\
-	%s\n*/\n\n", link_msg);
+		nice_printf (c_output, "(version %s). -- */\n\n", F2C_version);
+		//nice_printf (c_output,
+	//"   You must link the resulting object file with libf2c:\n\
+	//%s\n*/\n\n", link_msg);
 		}
 	if (Ansi == 2)
 		nice_printf(c_output,
 			"#ifdef __cplusplus\nextern \"C\" {\n#endif\n");
-	nice_printf (c_output, "%s#include \"%s\"\n\n", def_i2, f2c_include_hdr);
+    if(strcmp(f2c_include_hdr, "none") != 0)
+        nice_printf (c_output, "%s#include \"%s\"\n\n", def_i2, f2c_include_hdr);
 	if (trapuv)
 		nice_printf(c_output, "extern void _uninit_f2c(%s);\n%s\n\n",
 			Ansi ? "void*,int,long" : "", "extern double _0;");
@@ -713,7 +742,8 @@ sed \"s/^\\/\\*>>>'\\(.*\\)'<<<\\*\\/\\$/cat >'\\1' <<'\\/*<<<\\1>>>*\\/'/\" | /
 	wr_common_decls (c_output);
 	if (blkdfile)
 		list_init_data(&blkdfile, blkdfname, c_output);
-	wr_globals (c_output);
+    if (!localconstflag)
+        wr_globals (c_output, YES);
 	if ((c_file = fopen (c_functions, textread)) == (FILE *) NULL)
 	    Fatal("main - couldn't reopen c_functions");
 	ffilecopy (c_file, c_output);

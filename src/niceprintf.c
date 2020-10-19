@@ -256,7 +256,7 @@ fwd_strcpy(register char *t, register char *s)
 		set_cursor = 0;
 		}
 	if (in_comment) {
-		cmax = max_line_len + 32;	/* let comments be wider */
+		cmax = 1024;//max_line_len + 32;	/* let comments be wider */
         	for (pointer = next_slot; *pointer && *pointer != '\n' &&
 				cursor_pos <= cmax; pointer++)
 			cursor_pos++;

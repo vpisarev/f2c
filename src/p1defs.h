@@ -48,8 +48,8 @@
 
 
 
-#define COMMENT_BUFFER_SIZE 255	/* max number of chars in each comment */
-#define CONSTANT_STR_MAX 1000	/* max number of chars in string constant */
+#define COMMENT_BUFFER_SIZE 1024 /* max number of chars in each comment */
+#define CONSTANT_STR_MAX 1024	/* max number of chars in string constant */
 
 void	p1_asgoto Argdcl((Addrp));
 void	p1_comment Argdcl((char*));

@@ -121,7 +121,7 @@ table_entry opcode_table[] = {
 
 /* kludge to imitate (under forcedouble) f77's bizarre treatement of OPNEG... */
 
-	/* OPNEG KLUDGE */	{ UNARY_OP,  14, "-(doublereal)%l" }
+	/* OPNEG KLUDGE */	{ UNARY_OP,  14, "-(double)%l" }
 }; /* opcode_table */
 
 #define OPNEG_KLUDGE (sizeof(opcode_table)/sizeof(table_entry) - 1)

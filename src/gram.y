@@ -168,7 +168,8 @@ pop_datastack(Void) {
 %token SSLASHD 99
 %token SBYTE 100
 %token SRECURSIVE 101
-%token SEXIT 102
+%token SINTENT 102
+%token SEXIT 103
 
 /* Specify precedences and associativities. */
 
@@ -421,6 +422,14 @@ dcl:	  type opt_comma name in_dcl new_dcl dims lengspec
 		{ settype($3, $1, $7);
 		  if(ndim>0) setbound($3,ndim,dims);
 		}
+    | type SCOLON SCOLON name in_dcl new_dcl dims lengspec
+        { settype($4, $1, $8);
+            if(ndim>0) setbound($4,ndim,dims);
+        }
+    | type SCOMMA SINTENT SLPAR name SRPAR SCOLON SCOLON name in_dcl new_dcl dims lengspec
+        { settype($9, $1, $13);
+            if(ndim>0) setbound($9,ndim,dims);
+        }
 	| dcl SCOMMA name dims lengspec
 		{ settype($3, $1, $5);
 		  if(ndim>0) setbound($3,ndim,dims);

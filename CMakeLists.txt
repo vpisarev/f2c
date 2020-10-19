@@ -5,20 +5,13 @@ set(the_target f2c)
 
 find_package(BISON REQUIRED)
 
-set(gram_c ${CMAKE_BINARY_DIR}/gram.c)
-set(tokdefs_h ${CMAKE_BINARY_DIR}/tokdefs.h)
+set(gram_c ${CMAKE_CURRENT_BINARY_DIR}/gram.c)
+set(tokdefs_h ${CMAKE_CURRENT_BINARY_DIR}/tokdefs.h)
 
-if(BISON_FOUND)
-    add_custom_command(
-      SOURCE src/gram.y
-      COMMAND ${BISON_EXECUTABLE}
-      ARGS --defines=${tokdefs_h}
-           -y -o ${gram_c}
-           ${CMAKE_SOURCE_DIR}/src/gram.y
-      COMMENT "generating gram.c"
-      OUTPUT "${gram_c}" "${tokdefs_h}"
-    )
-endif()
+bison_target(f2cparser "src/gram.y" ${gram_c}
+             #COMPILE_FLAGS "-y"
+             DEFINES_FILE ${tokdefs_h}
+             )
 
 set(srcs
     src/main.c
@@ -49,7 +42,7 @@ set(srcs
     src/sysdep.c
     src/version.c
     src/gram.y
-    ${gram_c}
+    ${BISON_f2cparser_OUTPUTS}
 )
     
 set(hdrs    
@@ -68,11 +61,10 @@ set(hdrs
     src/pccdefs.h
     src/sysdep.h
     src/usignal.h
-    ${tokdefs_h}
 )
 
 add_executable(${the_target} ${srcs} ${hdrs})
 include_directories(src)
-include_directories(${CMAKE_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-parentheses")

@@ -222,7 +222,7 @@ write_comment(Void)
 {
 	if (!wrote_comment) {
 		wrote_comment = 1;
-		nice_printf (comment_file, "/* Parameter adjustments */\n");
+		nice_printf (comment_file, "// Parameter adjustments\n");
 		}
 	}
 
@@ -577,7 +577,7 @@ prolog(FILE *outfile, register chainp p)
 	    }
 	}
 	if (wrote_comment)
-	    nice_printf (outfile, "\n/* Function Body */\n");
+	    nice_printf (outfile, "\n// Function Body\n");
 	if (ac)
 		free((char *)ac);
 	if (p0 != p1)

@@ -34,6 +34,8 @@ use or performance of this software.
 
 int c_output_line_length = DEF_C_LINE_LENGTH;
 
+int empty_comment_lines = 0;
+int nonempty_comment_lines = 0;
 int last_was_label;	/* Boolean used to generate semicolons
 				   when a label terminates a block */
 static char this_proc_name[52];	/* Name of the current procedure.  This is
@@ -93,6 +95,7 @@ start_formatting(Void)
     extern char *p1_file, *p1_bakfile;
 
     this_proc_name[0] = '\0';
+    empty_comment_lines = nonempty_comment_lines = 0;
     last_was_label = 0;
     ei_next = ei_first;
     wh_next = wh_first;
@@ -121,7 +124,7 @@ start_formatting(Void)
     prev_tab (c_file);
     gflag1 = sharp_line = 0;
     if (this_proc_name[0])
-	nice_printf (c_file, "} /* %s */\n", this_proc_name);
+	nice_printf (c_file, "} // %s\n", this_proc_name);
 
 
 /* Write the #undefs for common variable reference */
@@ -198,6 +201,10 @@ do_format(FILE *infile, FILE *outfile)
     expptr retval = ENULL;
 
     token_type = get_p1_token (infile);
+    if (token_type != P1_COMMENT) {
+        empty_comment_lines = 0;
+        nonempty_comment_lines = 0;
+    }
     was_c_token = 1;
     switch (token_type) {
 	case P1_COMMENT:
@@ -332,16 +339,24 @@ do_p1_comment(FILE *infile, FILE *outfile)
     extern int in_comment;
 
     char storage[COMMENT_BUFFER_SIZE + 1];
-    int length;
+    int i, length;
 
     if (!p1gets(infile, storage, COMMENT_BUFFER_SIZE + 1))
 	return;
 
-    length = strlen (storage);
-
+    length = strlen(storage);
+    if (length == 0 && nonempty_comment_lines == 0)
+    {
+        empty_comment_lines++;
+        return;
+    }
     gflag1 = sharp_line = 0;
     in_comment = 1;
-    margin_printf(outfile, length ? "/* %s */\n" : "\n", storage);
+    for(i = 0; i < empty_comment_lines; i++)
+        nice_printf(outfile, "//\n");
+    empty_comment_lines = 0;
+    nonempty_comment_lines = 1;
+    nice_printf(outfile, "//%s%s\n", (isalnum(storage[0]) ? " " : ""), storage);
     in_comment = 0;
     gflag1 = sharp_line = gflag;
 } /* do_p1_comment */
@@ -512,7 +527,7 @@ do_p1_label(FILE *infile, FILE *outfile)
 		last_was_label = 1;
 		}
 	else
-		fmt = "/* %s: */\n";
+		fmt = "// %s:\n";
 	margin_printf(outfile, fmt, user_label(L->stateno));
     } /* else */
 } /* do_p1_label */
@@ -981,6 +996,8 @@ do_p1_head(FILE *infile, FILE *outfile)
 	frchain(&lengths);
 	next_tab (outfile);
 	strcpy(this_proc_name, storage);
+    if (localconstflag)
+        wr_globals(outfile, NO);
 	list_decls (outfile);
 
     } else if (Class == CLBLOCK)
@@ -1727,7 +1744,7 @@ list_decls(FILE *outfile)
 			&& multitype)
 		continue;
 	    if (!did_one)
-		nice_printf (outfile, "/* System generated locals */\n");
+		nice_printf (outfile, "// System generated locals\n");
 
 	    if (last_type == type && did_one)
 		nice_printf (outfile, ", ");
@@ -1772,7 +1789,7 @@ list_decls(FILE *outfile)
 	last_type = -1;
 	did_one = 0;
 
-	nice_printf (outfile, "/* Builtin functions */");
+	nice_printf (outfile, "// Builtin functions");
 
 	for (cp = used_builtins; cp; cp = cp -> nextp) {
 	    Addrp e = (Addrp)cp->datap;
@@ -1885,7 +1902,7 @@ list_decls(FILE *outfile)
 	    if (write_header == 1 && (new_vars || nequiv || used_builtins)
 		    && oneof_stg ( var, stg,
 		    M(STGBSS)|M(STGEXT)|M(STGAUTO)|M(STGCOMMON)|M(STGEQUIV))) {
-		nice_printf (outfile, "/* Local variables */\n");
+		nice_printf (outfile, "// Local variables\n");
 		write_header = 2;
 		}
 
@@ -2126,7 +2143,7 @@ do_uninit_equivs(FILE *outfile, int *did_one)
     for (eqv = eqvclass; eqv < lasteqv; eqv++)
 	if (!eqv -> eqvinit && eqv -> eqvtop != eqv -> eqvbottom) {
 	    if (!*did_one)
-		nice_printf (outfile, "/* System generated locals */\n");
+		nice_printf (outfile, "// System generated locals\n");
 	    t = eqv->eqvtype;
 	    if (last_type == t)
 		nice_printf (outfile, ", ");

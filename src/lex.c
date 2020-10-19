@@ -258,6 +258,7 @@ static const char* toknames[] = {
 "SSLASHD",
 "SBYTE",
 "SRECURSIVE",
+"SINTENT",
 "SEXIT"};
 
 static const char* tok2str(int tok)
@@ -335,6 +336,7 @@ LOCAL struct Keylist  keys[ ] =
 	{ "inquire",  SINQUIRE, YES  },
 	{ "intrinsic",  SINTRINSIC, YES  },
 	{ "integer",  SINTEGER  },
+    { "intent", SINTENT, YES },
 	{ "logical",  SLOGICAL  },
 	{ "namelist", SNAMELIST, YES },
 	{ "none", SUNDEFINED, YES },
@@ -669,6 +671,8 @@ first:
 			}
 		else
 			retval = gettok();
+        if(retval == SCOMMA && tokno == 2)
+            needkwd = YES;
 		break;
 
 reteos:
